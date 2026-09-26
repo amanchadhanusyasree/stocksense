@@ -1,18 +1,36 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StockSense</title>
-
-    <meta http-equiv="refresh" content="0; url=dashboard/dashboard.html">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f6f8fb"><meta name="description" content="StockSense inventory management dashboard">
+  <title>StockSense — Inventory workspace</title><link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
-    <p>Opening StockSense Dashboard...</p>
-
-    <script>
-        window.location.href = "dashboard/dashboard.html";
-    </script>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#dashboard"><span class="brand-mark">S</span><span>stock<span class="brand-light">sense</span><small>INVENTORY WORKSPACE</small></span></a>
+      <div class="workspace-switch"><span class="workspace-icon" id="workspaceInitial">W</span><span><b id="workspaceName">My workspace</b><small>Workspace</small></span><span class="chevron">⌄</span></div>
+      <div class="nav-label">WORKSPACE</div><nav class="main-nav" id="mainNav">
+        <button class="nav-item active" data-view="dashboard"><span class="nav-icon">▦</span>Dashboard</button>
+        <button class="nav-item" data-view="products"><span class="nav-icon">◫</span>Products <span class="nav-count" id="productCount">0</span></button>
+        <div class="nav-label nav-label-spaced">OPERATIONS</div>
+        <button class="nav-item" data-view="receipts"><span class="nav-icon">↙</span>Receipts <i class="nav-dot"></i></button>
+        <button class="nav-item" data-view="deliveries"><span class="nav-icon">↗</span>Delivery orders</button>
+        <button class="nav-item" data-view="transfers"><span class="nav-icon">⇄</span>Internal transfers</button>
+        <button class="nav-item" data-view="adjustments"><span class="nav-icon">⊞</span>Adjustments</button>
+        <button class="nav-item" data-view="history"><span class="nav-icon">◷</span>Move history</button>
+        <div class="nav-label nav-label-spaced">MANAGE</div>
+        <button class="nav-item" data-view="warehouses"><span class="nav-icon">⌂</span>Warehouses</button>
+        <button class="nav-item" data-view="settings"><span class="nav-icon">⚙</span>Settings</button>
+      </nav>
+      <div class="sidebar-bottom"><button class="help-card" data-action="help-center" type="button"><span class="help-icon">?</span><span><b>Need a hand?</b><small>Visit the help center</small></span><span>↗</span></button><button class="profile-button" id="profileButton"><span class="avatar" id="sidebarAvatar">U</span><span><b id="profileName">User</b><small>Inventory manager</small></span><span class="chevron">···</span></button></div>
+    </aside>
+    <main class="main-area">
+      <header class="topbar"><button class="icon-button menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button><div class="breadcrumbs">Workspace <span>/</span> <b id="breadcrumb">Dashboard</b></div><span class="sync-state" id="syncState"><i></i> Connecting</span><div class="top-actions"><div class="warehouse-select"><span class="warehouse-pin">⌖</span><select id="warehouseFilter" aria-label="Warehouse"><option value="All warehouses">All warehouses</option><option>Main Warehouse</option><option>Production Floor</option><option>East Depot</option></select></div><button class="icon-button notification-button" id="notificationButton" aria-label="Notifications">♧<i></i></button><button class="top-avatar" id="topAvatar" aria-label="Open profile menu" aria-expanded="false">U</button></div></header>
+      <section class="page-content" id="pageContent"></section>
+    </main>
+  </div>
+  <div id="modalRoot"></div><div class="toast-region" id="toastRegion" aria-live="polite"></div>
+  <script src="app.js"></script>
 </body>
 </html>
