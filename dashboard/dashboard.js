@@ -42,62 +42,13 @@ function updateKPIs() {
 
 
 // ===============================
-// FILTERS
+// STOCK CHART
 // ===============================
-
-const documentFilter = document.querySelector("select");
-
-documentFilter.addEventListener("change", function () {
-
-    const selected = this.value;
-
-    if (selected === "Receipts") {
-        stockChart.data.datasets[0].data = [150, 110, 60, 90, 120];
-    }
-
-    else if (selected === "Deliveries") {
-        stockChart.data.datasets[0].data = [80, 55, 30, 45, 70];
-    }
-
-    else if (selected === "Internal Transfers") {
-        stockChart.data.datasets[0].data = [100, 75, 40, 60, 85];
-    }
-
-    else if (selected === "Adjustments") {
-        stockChart.data.datasets[0].data = [90, 65, 35, 50, 75];
-    }
-
-    else {
-        stockChart.data.datasets[0].data = [120, 85, 45, 70, 95];
-    }
-
-    stockChart.update();
-});
-
-// ===============================
-// VIEW HISTORY BUTTON
-// ===============================
-
-document
-    .getElementById("viewHistoryBtn")
-    .addEventListener("click", () => {
-
-        alert("Move History module will open here.");
-
-    });
-
-
-// ===============================
-// INITIALIZE DASHBOARD
-// ===============================
-
-updateKPIs();
-
-console.log("StockSense Dashboard loaded successfully.");
 
 const ctx = document.getElementById("stockChart");
 
-new Chart(ctx, {
+const stockChart = new Chart(ctx, {
+
     type: "bar",
 
     data: {
@@ -119,18 +70,76 @@ new Chart(ctx, {
     options: {
         responsive: true,
         maintainAspectRatio: false
-       const documentFilter = document.querySelector("select");
+    }
+});
+
+
+// ===============================
+// DOCUMENT FILTER
+// ===============================
+
+const documentFilter = document.querySelector("select");
 
 documentFilter.addEventListener("change", function () {
 
-    if (this.value === "All Documents") {
-        console.log("Showing all documents");
-    } 
-    else {
-        console.log("Selected:", this.value);
+    const selected = this.value;
+
+    if (selected === "Receipts") {
+
+        stockChart.data.datasets[0].data =
+            [150, 110, 60, 90, 120];
+
     }
 
-});
-});
+    else if (selected === "Deliveries") {
+
+        stockChart.data.datasets[0].data =
+            [80, 55, 30, 45, 70];
+
     }
+
+    else if (selected === "Internal Transfers") {
+
+        stockChart.data.datasets[0].data =
+            [100, 75, 40, 60, 85];
+
+    }
+
+    else if (selected === "Adjustments") {
+
+        stockChart.data.datasets[0].data =
+            [90, 65, 35, 50, 75];
+
+    }
+
+    else {
+
+        stockChart.data.datasets[0].data =
+            [120, 85, 45, 70, 95];
+    }
+
+    stockChart.update();
+
 });
+
+
+// ===============================
+// VIEW HISTORY BUTTON
+// ===============================
+
+document
+    .getElementById("viewHistoryBtn")
+    .addEventListener("click", () => {
+
+        alert("Move History module will open here.");
+
+    });
+
+
+// ===============================
+// INITIALIZE DASHBOARD
+// ===============================
+
+updateKPIs();
+
+console.log("StockSense Dashboard loaded successfully.");
