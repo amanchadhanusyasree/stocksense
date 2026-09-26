@@ -120,5 +120,10 @@ new Chart(ctx, {
     options: {
         responsive: true,
         maintainAspectRatio: false
+        const documentFilter = document.querySelector("select");
+
+documentFilter.addEventListener("change", function () {
+    console.log("Document filter selected:", this.value);
+});
     }
 });
