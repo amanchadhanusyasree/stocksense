@@ -1,1 +1,15 @@
-
+{
+  "name": "stocksense-inventory",
+  "version": "1.0.0",
+  "private": true,
+  "description": "StockSense inventory management app with a built-in Node.js API",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@google/genai": "^2.24.0"
+  }
+}
