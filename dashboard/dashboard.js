@@ -321,20 +321,6 @@ document
 // VIEW HISTORY BUTTON
 // ===============================
 
-document
-    .getElementById("viewHistoryBtn")
-    .addEventListener("click", function () {
-
-        alert(
-            "Move History\n\n" +
-            "Steel Rods — Receipt — +50\n" +
-            "Office Chairs — Delivery — -10\n" +
-            "Aluminium Sheets — Transfer — +20\n" +
-            "Plastic Covers — Adjustment — -3"
-        );
-
-    });
-
 
 // ===============================
 // INITIALIZE DASHBOARD
