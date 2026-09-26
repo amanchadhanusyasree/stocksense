@@ -1,429 +1,114 @@
-// ===============================
-// StockSense Dashboard
-// ===============================
-
-
-// ===============================
-// DASHBOARD DATA
-// ===============================
-
-const dashboardData = {
-    totalProducts: 248,
-    lowStock: 12,
-    outOfStock: 4,
-    pendingReceipts: 8,
-    pendingDeliveries: 15,
-    scheduledTransfers: 6
-};
-
-
-// ===============================
-// PRODUCT DATA
-// ===============================
-
-const products = [
-    {
-        name: "Steel Rods",
-        stock: 120,
-        type: "receipt",
-        status: "done",
-        warehouse: "main",
-        category: "raw"
-    },
-
-    {
-        name: "Aluminium Sheets",
-        stock: 85,
-        type: "receipt",
-        status: "ready",
-        warehouse: "production",
-        category: "raw"
-    },
-
-    {
-        name: "Plastic Covers",
-        stock: 45,
-        type: "adjustment",
-        status: "done",
-        warehouse: "main",
-        category: "raw"
-    },
-
-    {
-        name: "Office Chairs",
-        stock: 70,
-        type: "delivery",
-        status: "done",
-        warehouse: "main",
-        category: "finished"
-    },
-
-    {
-        name: "Copper Wires",
-        stock: 95,
-        type: "transfer",
-        status: "ready",
-        warehouse: "production",
-        category: "raw"
-    }
+/* StockSense frontend. Inventory state and authentication are served by the local API. */
+const initialProducts=[
+ {id:'P-1042',name:'Steel Rods',sku:'STL-001',category:'Raw materials',unit:'kg',stock:248,min:100,location:'Main Warehouse',icon:'▤'},
+ {id:'P-1038',name:'Oak Dining Chair',sku:'FUR-014',category:'Furniture',unit:'pcs',stock:42,min:50,location:'Production Floor',icon:'▰'},
+ {id:'P-1035',name:'Brass Hinges',sku:'HRD-022',category:'Hardware',unit:'pcs',stock:16,min:40,location:'Main Warehouse',icon:'⚙'},
+ {id:'P-1029',name:'Canvas Fabric',sku:'TXT-008',category:'Textiles',unit:'m',stock:320,min:80,location:'East Depot',icon:'▥'},
+ {id:'P-1024',name:'Walnut Plank',sku:'WD-006',category:'Raw materials',unit:'pcs',stock:8,min:30,location:'Main Warehouse',icon:'▱'},
+ {id:'P-1018',name:'Packing Boxes',sku:'PKG-031',category:'Packaging',unit:'pcs',stock:186,min:100,location:'East Depot',icon:'▣'},
+ {id:'P-1012',name:'Steel Fasteners',sku:'STL-009',category:'Hardware',unit:'pcs',stock:0,min:60,location:'Production Floor',icon:'⛓'},
+ {id:'P-1007',name:'Cotton Thread',sku:'TXT-012',category:'Textiles',unit:'spool',stock:94,min:40,location:'East Depot',icon:'◉'}
 ];
-
-
-// ===============================
-// UPDATE KPI CARDS
-// ===============================
-
-function updateKPIs() {
-
-    document.getElementById("totalProducts").textContent =
-        dashboardData.totalProducts;
-
-    document.getElementById("lowStock").textContent =
-        dashboardData.lowStock;
-
-    document.getElementById("outOfStock").textContent =
-        dashboardData.outOfStock;
-
-    document.getElementById("pendingReceipts").textContent =
-        dashboardData.pendingReceipts;
-
-    document.getElementById("pendingDeliveries").textContent =
-        dashboardData.pendingDeliveries;
-
-    document.getElementById("scheduledTransfers").textContent =
-        dashboardData.scheduledTransfers;
+const initialOps=[
+ {id:'REC-2841',type:'Receipt',party:'Apex Steel Co.',lines:'Steel Rods, Steel Fasteners',qty:150,warehouse:'Main Warehouse',date:'2026-09-26',status:'Ready'},
+ {id:'DEL-1092',type:'Delivery',party:'Urban Living Co.',lines:'Oak Dining Chair',qty:12,warehouse:'Production Floor',date:'2026-09-26',status:'Waiting'},
+ {id:'TRF-0518',type:'Internal',party:'Main Warehouse → Production Floor',lines:'Steel Rods',qty:40,warehouse:'Main Warehouse',date:'2026-09-25',status:'Done'},
+ {id:'REC-2840',type:'Receipt',party:'Loom & Co.',lines:'Canvas Fabric, Cotton Thread',qty:85,warehouse:'East Depot',date:'2026-09-25',status:'Done'},
+ {id:'ADJ-0136',type:'Adjustment',party:'Cycle count',lines:'Walnut Plank',qty:-2,warehouse:'Main Warehouse',date:'2026-09-24',status:'Done'},
+ {id:'DEL-1091',type:'Delivery',party:'Forma Studio',lines:'Oak Dining Chair, Brass Hinges',qty:8,warehouse:'Production Floor',date:'2026-09-24',status:'Ready'},
+ {id:'TRF-0517',type:'Internal',party:'East Depot → Main Warehouse',lines:'Packing Boxes',qty:30,warehouse:'East Depot',date:'2026-09-23',status:'Waiting'},
+ {id:'REC-2839',type:'Receipt',party:'Northline Hardware',lines:'Brass Hinges, Steel Fasteners',qty:120,warehouse:'Main Warehouse',date:'2026-09-22',status:'Done'}
+];
+let products=initialProducts,operations=initialOps;
+let currentUser={name:'User',email:'',workspace:'My workspace'};
+let view='dashboard',tableFilter='All',query='',statusFilter='All statuses',categoryFilter='All categories';
+let helpHistory=[];
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const api=async(path,options={})=>{const token=sessionStorage.getItem('stocksense-token');const res=await fetch(path,{...options,headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`} : {}),...(options.headers||{})}});const data=await res.json().catch(()=>({}));if(!res.ok){if(res.status===401){sessionStorage.removeItem('stocksense-token');location.href='login.html'}throw new Error(data.error||'Request failed')}return data};
+const save=()=>{api('/api/state',{method:'PUT',body:JSON.stringify({products,operations})}).catch(e=>toast(`Could not save changes: ${e.message}`,true))};
+const fmt=n=>new Intl.NumberFormat('en-US').format(n);
+const personInitials=name=>String(name||'U').trim().split(/\s+/).slice(0,2).map(x=>x.charAt(0).toUpperCase()).join('')||'U';
+const properName=name=>String(name||'User').trim().replace(/\b\w/g,c=>c.toUpperCase());
+const localDate=()=>new Date().toISOString().slice(0,10);
+const titleMap={dashboard:'Dashboard',products:'Products',receipts:'Receipts','deliveries':'Delivery orders',transfers:'Internal transfers',adjustments:'Adjustments',history:'Move history',warehouses:'Warehouses',settings:'Settings'};
+function stockState(p){return p.stock===0?'Out of stock':p.stock<=p.min?'Low stock':'In stock'}
+function statusPill(s){let cl=s.toLowerCase().replaceAll(' ','-');if(cl==='in-stock')cl='ready';if(cl==='out-of-stock')cl='out';return `<span class="pill ${cl}">${esc(s)}</span>`}
+function productCell(p){return `<div class="product-cell"><span class="product-thumb">${p.icon||'◫'}</span><span><b>${esc(p.name)}</b><small>${esc(p.category)}</small></span></div>`}
+function heading(kicker,title,desc,actions=''){return `<div class="page-heading"><div><div class="eyebrow">${kicker}</div><h1>${title}</h1><p>${desc}</p></div><div class="heading-actions">${actions}</div></div>`}
+function btn(label,action,primary=false,icon=''){return `<button class="btn ${primary?'btn-primary':''}" data-action="${action}">${icon?`<span>${icon}</span>`:''}${label}</button>`}
+function page(){
+ $('#breadcrumb').textContent=titleMap[view]||'Dashboard';
+ $$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+ $('#productCount').textContent=products.length;
+ $('#pageContent').innerHTML=(view==='dashboard'?dashboard():view==='products'?productPage():['receipts','deliveries','transfers','adjustments','history'].includes(view)?operationsPage():view==='warehouses'?warehousePage():settingsPage())+`<footer class="page-footer"><span>© ${new Date().getFullYear()} StockSense</span><span>Inventory workspace</span><button type="button" class="footer-help" data-action="help-center">Help center</button></footer>`;
 }
-
-
-// ===============================
-// GET FILTERED PRODUCTS
-// ===============================
-
-function getFilteredProducts() {
-
-    const documentValue =
-        document.getElementById("documentFilter").value;
-
-    const statusValue =
-        document.getElementById("statusFilter").value;
-
-    const warehouseValue =
-        document.getElementById("warehouseFilter").value;
-
-    const categoryValue =
-        document.getElementById("categoryFilter").value;
-
-    return products.filter(product => {
-
-        const documentMatch =
-            documentValue === "all" ||
-            product.type === documentValue;
-
-        const statusMatch =
-            statusValue === "all" ||
-            product.status === statusValue;
-
-        const warehouseMatch =
-            warehouseValue === "all" ||
-            product.warehouse === warehouseValue;
-
-        const categoryMatch =
-            categoryValue === "all" ||
-            product.category === categoryValue;
-
-        return (
-            documentMatch &&
-            statusMatch &&
-            warehouseMatch &&
-            categoryMatch
-        );
-    });
+function dashboard(){
+ const low=products.filter(p=>p.stock<=p.min).length, pendingReceipts=operations.filter(o=>o.type==='Receipt'&&o.status!=='Done'&&o.status!=='Canceled').length,pendingDelivery=operations.filter(o=>o.type==='Delivery'&&o.status!=='Done'&&o.status!=='Canceled').length,scheduled=operations.filter(o=>o.type==='Internal'&&o.status!=='Done'&&o.status!=='Canceled').length;
+ const units=products.reduce((a,p)=>a+p.stock,0);
+ const kpis=[['Units in stock',fmt(units),'Across all locations','▤',''],['Low / out of stock',String(low),'Items need attention','⚠','orange'],['Pending receipts',String(pendingReceipts),'Awaiting validation','↙','blue'],['Pending deliveries',String(pendingDelivery),'Orders to fulfill','↗','orange'],['Transfers scheduled',String(scheduled),'Internal movements','⇄','']];
+ const cards=kpis.map((k,i)=>`<article class="kpi-card"><div class="kpi-top">${k[0]}<span class="kpi-icon ${k[4]}">${k[3]}</span></div><div class="kpi-value">${k[1]}</div><div class="kpi-foot">${i===0?'<span class="positive">↑ 8.2%</span> this month':i===1?'<span class="negative">Review stock levels</span>':k[2]}</div></article>`).join('');
+ const lowItems=[...products].filter(p=>p.stock<=p.min).sort((a,b)=>a.stock/b.min-b.stock/a.min).slice(0,4);
+ const recent=operations.slice(0,6);
+ const bars=[53,71,64,85,60,76,94,68,87,73,100,82];
+ return `${heading('Friday, September 26, 2026',`Good morning, ${esc(properName(currentUser.name).split(/\s+/)[0])} <span style="color:#17845c">✳</span>`,'Here’s what’s happening across your inventory today.',btn('＋ New operation','new-operation',true))}<div class="kpi-grid">${cards}</div>
+  <div class="dashboard-grid"><section class="panel"><div class="panel-heading"><div><div class="panel-title">Stock movement</div><div class="panel-subtitle">Incoming and outgoing goods over the last 12 months</div></div><div class="chart-legend"><span><i class="legend-dot"></i>Incoming</span><span><i class="legend-dot pale"></i>Outgoing</span><select class="filter-select" id="chartRange"><option>Last 12 months</option><option>Last 6 months</option></select></div></div><div class="chart"><div class="chart-y"><span>500</span><span>375</span><span>250</span><span>125</span><span>0</span></div><div class="chart-columns">${bars.map((h,i)=>`<div class="chart-group"><span class="chart-bar" style="height:${h}%"></span><span class="chart-bar pale" style="height:${Math.max(15,h-23)}%"></span><span class="chart-label">${['Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'][i]}</span></div>`).join('')}</div></div></section>
+  <section class="panel"><div class="panel-heading"><div><div class="panel-title">Needs attention</div><div class="panel-subtitle">Products at or below reorder level</div></div><button class="text-link" data-view="products">View all →</button></div><div class="stock-list">${lowItems.length?lowItems.map(p=>`<div class="stock-row"><span class="product-thumb">${p.icon||'◫'}</span><div class="product-info"><b>${esc(p.name)}</b><small>${esc(p.location)}</small></div><div class="stock-level"><b>${p.stock} / ${p.min}</b><small>${esc(p.unit)} remaining</small><div class="progress"><span style="width:${Math.min(100,100*p.stock/p.min)}%"></span></div></div></div>`).join(''):'<div class="empty-state">All products are above their reorder point.</div>'}</div></section></div>
+  <section class="panel table-panel"><div class="table-toolbar"><div class="toolbar-left"><div><div class="panel-title">Recent operations</div><div class="panel-subtitle">Your latest stock activity</div></div></div><div class="toolbar-right"><select class="filter-select" id="dashType"><option>All types</option><option>Receipt</option><option>Delivery</option><option>Internal</option><option>Adjustment</option></select><select class="filter-select" id="dashStatus"><option>All statuses</option><option>Draft</option><option>Waiting</option><option>Ready</option><option>Done</option><option>Canceled</option></select><button class="text-link" data-view="history">View all →</button></div></div><div class="table-scroll"><table class="data-table"><thead><tr><th>REFERENCE</th><th>TYPE</th><th>CONTACT / ROUTE</th><th>LOCATION</th><th>DATE</th><th>STATUS</th><th></th></tr></thead><tbody id="recentBody">${renderOpRows(recent,true)}</tbody></table></div></section>`;
 }
-
-
-// ===============================
-// UPDATE STOCK GRAPH
-// ===============================
-
-function updateStockGraph() {
-
-    const filteredProducts = getFilteredProducts();
-
-    const bars =
-        document.querySelectorAll(".bar-chart .bar");
-
-    const labels =
-        document.querySelectorAll(".bar-chart .bar-item span");
-
-    bars.forEach((bar, index) => {
-
-        bar.style.height = "0px";
-
-        if (labels[index]) {
-            labels[index].style.opacity = "0.35";
-        }
-
-    });
-
-    filteredProducts.forEach(product => {
-
-        const index =
-            products.findIndex(item =>
-                item.name === product.name
-            );
-
-        if (index !== -1 && bars[index]) {
-
-            bars[index].style.height =
-                product.stock + "px";
-
-            if (labels[index]) {
-                labels[index].style.opacity = "1";
-            }
-
-        }
-
-    });
+function renderOpRows(rows,dashboardMode=false){if(!rows.length)return `<tr><td colspan="7"><div class="empty-state">No operations match these filters.</div></td></tr>`;return rows.map(o=>`<tr><td><span class="sku">${esc(o.id)}</span></td><td>${typeIcon(o.type)} ${esc(o.type)}</td><td>${esc(o.party)}</td><td>${esc(o.warehouse)}</td><td>${dateLabel(o.date)}</td><td>${statusPill(o.status)}</td><td><button class="row-actions" data-action="op-menu" data-id="${o.id}">···</button></td></tr>`).join('')}
+function typeIcon(type){return type==='Receipt'?'↙':type==='Delivery'?'↗':type==='Internal'?'⇄':'⊞'}
+function dateLabel(d){const dt=new Date(`${d}T12:00:00`);return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
+function productPage(){const cats=['All categories',...new Set(products.map(p=>p.category))];const visible=products.filter(p=>(categoryFilter==='All categories'||p.category===categoryFilter)&&(query===''||`${p.name} ${p.sku} ${p.category}`.toLowerCase().includes(query.toLowerCase()))&&(tableFilter==='All'||stockState(p)===tableFilter));return `${heading('CATALOG','Products',`${products.length} products in your catalog. Track quantities, reorder points and locations.`,btn('＋ Add product','add-product',true))}<div class="stat-strip"><div class="stat-mini"><small>Total products</small><b>${products.length}</b></div><div class="stat-mini"><small>Total units</small><b>${fmt(products.reduce((n,p)=>n+p.stock,0))}</b></div><div class="stat-mini"><small>Need reorder</small><b style="color:#cc792b">${products.filter(p=>p.stock<=p.min).length}</b></div><div class="stat-mini"><small>Categories</small><b>${new Set(products.map(p=>p.category)).size}</b></div></div><section class="panel table-panel"><div class="table-toolbar"><div class="toolbar-left"><div class="segmented">${['All','In stock','Low stock','Out of stock'].map(f=>`<button class="segment ${tableFilter===f?'active':''}" data-stockfilter="${f}">${f}</button>`).join('')}</div></div><div class="toolbar-right"><label class="search-box">⌕ <input id="productSearch" placeholder="Search products..." value="${esc(query)}"></label><select class="filter-select" id="categoryFilter">${cats.map(c=>`<option ${c===categoryFilter?'selected':''}>${esc(c)}</option>`).join('')}</select><button class="btn btn-sm" data-action="export-products">↓ Export</button></div></div><div class="table-scroll"><table class="data-table"><thead><tr><th>PRODUCT</th><th>SKU</th><th>ON HAND</th><th>REORDER AT</th><th>LOCATION</th><th>STATUS</th><th></th></tr></thead><tbody>${visible.length?visible.map(p=>`<tr><td>${productCell(p)}</td><td class="sku">${esc(p.sku)}</td><td class="qty">${fmt(p.stock)} <span style="font-size:9px;font-weight:400;color:#829088">${esc(p.unit)}</span></td><td>${fmt(p.min)} ${esc(p.unit)}</td><td>${esc(p.location)}</td><td>${statusPill(stockState(p))}</td><td><button class="row-actions" data-action="edit-product" data-id="${p.id}">···</button></td></tr>`).join(''):`<tr><td colspan="7"><div class="empty-state">No products match these filters.</div></td></tr>`}</tbody></table></div><div class="table-footer"><span>Showing ${visible.length} of ${products.length} products</span><div class="pagination"><button class="page-button active">1</button></div></div></section>`}
+function opsForView(){const map={receipts:'Receipt',deliveries:'Delivery',transfers:'Internal',adjustments:'Adjustment'};return map[view]?operations.filter(o=>o.type===map[view]):operations}
+function operationsPage(){const names={receipts:['INCOMING STOCK','Receipts','Track and validate goods arriving from your suppliers.','＋ New receipt'],deliveries:['OUTGOING STOCK','Delivery orders','Pick, pack and validate outgoing customer orders.','＋ New delivery'],transfers:['INTERNAL MOVEMENT','Internal transfers','Move stock between your warehouses and locations.','＋ New transfer'],adjustments:['STOCK CONTROL','Adjustments','Reconcile recorded stock with your physical counts.','＋ New adjustment'],history:['STOCK LEDGER','Move history','A complete ledger of stock movements across your workspace.','↓ Export history']};const [k,t,d,cta]=names[view],rows=opsForView().filter(o=>(statusFilter==='All statuses'||o.status===statusFilter)&&(query===''||`${o.id} ${o.party} ${o.lines}`.toLowerCase().includes(query.toLowerCase())));let action=view==='history'?'export-history':'new-operation';let filters=['All statuses','Draft','Waiting','Ready','Done','Canceled'];return `${heading(k,t,d,btn(cta,action,view!=='history'))}<section class="panel table-panel"><div class="table-toolbar"><div class="toolbar-left"><div class="panel-title">${t} <span style="font:400 10px 'DM Sans';color:#97a39c">(${rows.length})</span></div></div><div class="toolbar-right"><label class="search-box">⌕ <input id="operationSearch" placeholder="Search operations..." value="${esc(query)}"></label><select class="filter-select" id="statusFilter">${filters.map(f=>`<option ${f===statusFilter?'selected':''}>${f}</option>`).join('')}</select><button class="btn btn-sm" data-action="export-history">↓ Export</button></div></div><div class="table-scroll"><table class="data-table"><thead><tr><th>REFERENCE</th><th>TYPE</th><th>CONTACT / ROUTE</th><th>PRODUCTS</th><th>QUANTITY</th><th>LOCATION</th><th>DATE</th><th>STATUS</th><th></th></tr></thead><tbody>${rows.length?rows.map(o=>`<tr><td class="sku">${esc(o.id)}</td><td>${typeIcon(o.type)} ${esc(o.type)}</td><td>${esc(o.party)}</td><td>${esc(o.lines)}</td><td class="qty">${o.qty>0?'+':''}${o.qty}</td><td>${esc(o.warehouse)}</td><td>${dateLabel(o.date)}</td><td>${statusPill(o.status)}</td><td><button class="row-actions" data-action="op-menu" data-id="${o.id}">···</button></td></tr>`).join(''):`<tr><td colspan="9"><div class="empty-state">No operations match these filters.</div></td></tr>`}</tbody></table></div><div class="table-footer"><span>Showing ${rows.length} of ${opsForView().length} operations</span><div class="pagination"><button class="page-button active">1</button></div></div></section>`}
+function warehousePage(){return `${heading('LOCATIONS','Warehouses','Manage locations and see how inventory is distributed.',btn('＋ Add warehouse','add-warehouse',true))}<div class="content-grid"><section class="panel"><div class="panel-heading"><div><div class="panel-title">Your locations</div><div class="panel-subtitle">3 active locations</div></div><span class="pill ready">All operational</span></div>${[['Main Warehouse','Central storage · 4 zones','⌂'],['Production Floor','Assembly and work in progress','⚒'],['East Depot','Overflow and finished goods','⌖']].map(([name,desc,icon])=>`<div class="warehouse-card"><span class="warehouse-symbol">${icon}</span><div><b>${name}</b><small>${desc}</small><small>${products.filter(p=>p.location===name).length} tracked products · ${fmt(products.filter(p=>p.location===name).reduce((n,p)=>n+p.stock,0))} units</small></div><span class="pill ready">Active</span></div>`).join('')}</section><section class="panel"><div class="panel-heading"><div><div class="panel-title">Inventory by location</div><div class="panel-subtitle">Current stock distribution</div></div></div>${['Main Warehouse','Production Floor','East Depot'].map((loc,i)=>{let n=products.filter(p=>p.location===loc).reduce((a,p)=>a+p.stock,0);return `<div class="settings-row"><div><b>${loc}</b><small>${fmt(n)} units available</small></div><span class="pill ${i===1?'low':'ready'}">${i===1?'1 low stock':'Healthy'}</span></div>`}).join('')}</section></div>`}
+function settingsPage(){return `${heading('PREFERENCES','Settings','Configure how your StockSense workspace operates.',btn('Save changes','save-settings',true))}<div class="content-grid"><section class="panel"><div class="panel-heading"><div><div class="panel-title">Inventory preferences</div><div class="panel-subtitle">Choose how stock levels are managed</div></div></div>${[['Low stock alerts','Get notified when a product falls below its reorder point',true],['Out of stock alerts','Get notified when a product reaches zero',true],['Email operation summaries','Receive a daily summary of stock movements',false],['Require validation for receipts','Review incoming quantities before updating stock',true]].map(([a,b,on])=>`<div class="settings-row"><div><b>${a}</b><small>${b}</small></div><button class="toggle ${on?'on':''}" data-action="toggle"></button></div>`).join('')}</section><section class="panel"><div class="panel-heading"><div><div class="panel-title">Workspace details</div><div class="panel-subtitle">Information about your organization</div></div></div><div class="field" style="margin-bottom:13px"><label>Workspace name</label><input value="${esc(currentUser.workspace)}"></div><div class="field" style="margin-bottom:13px"><label>Default unit of measure</label><select><option>Units (pcs)</option><option>Kilograms (kg)</option><option>Metres (m)</option></select></div><div class="field"><label>Time zone</label><select><option>Asia / Kolkata (IST)</option><option>UTC</option></select></div></section><section class="panel"><div class="panel-heading"><div><div class="panel-title">Profile</div><div class="panel-subtitle">Your account information</div></div><button class="btn btn-sm" data-action="edit-profile">Edit profile</button></div><div class="warehouse-card"><span class="avatar">${esc(personInitials(currentUser.name))}</span><div><b>${esc(properName(currentUser.name))}</b><small>${esc(currentUser.email)}</small><small>Inventory manager</small></div></div></section><section class="panel"><div class="panel-heading"><div><div class="panel-title">Account access</div><div class="panel-subtitle">Authentication and security</div></div></div><div class="settings-row"><div><b>Password</b><small>Update your password regularly to keep your account secure</small></div><button class="btn btn-sm" data-action="reset-password">Reset password</button></div><div class="settings-row"><div><b>Sign out</b><small>Sign out of StockSense on this device</small></div><button class="btn btn-sm" data-action="logout">Log out</button></div></section></div>`}
+function openModal(title,subtitle,body,submitLabel,handler){$('#modalRoot').innerHTML=`<div class="modal-backdrop" data-action="backdrop"><form class="modal" id="modalForm"><div class="modal-header"><div><h2>${title}</h2><p>${subtitle}</p></div><button class="modal-close" type="button" data-action="close-modal">×</button></div><div class="modal-body">${body}</div><div class="modal-footer"><button type="button" class="btn" data-action="close-modal">Cancel</button><button class="btn btn-primary" type="submit">${submitLabel}</button></div></form></div>`;$('#modalForm').addEventListener('submit',e=>{e.preventDefault();handler(new FormData(e.currentTarget))})}
+const field=(label,name,value='',type='text',options=null,required=false)=>`<div class="field"><label>${label}${required?' *':''}</label>${options?`<select name="${name}" ${required?'required':''}>${options.map(o=>`<option ${o===value?'selected':''}>${esc(o)}</option>`).join('')}</select>`:`<input name="${name}" type="${type}" value="${esc(value)}" ${required?'required':''} ${type==='number'?'min="0"':''}></div>`}`;
+function productModal(p=null){const cats=['Raw materials','Furniture','Hardware','Textiles','Packaging','Other'],locs=['Main Warehouse','Production Floor','East Depot'];let editing=!!p;openModal(editing?'Edit product':'Add a product',editing?'Update product information and stock thresholds.':'Add a product to your inventory catalog.',`<div class="form-grid">${field('Product name','name',p?.name||'','text',null,true)}${field('SKU / code','sku',p?.sku||'','text',null,true)}${field('Category','category',p?.category||cats[0],null,cats,true)}${field('Unit of measure','unit',p?.unit||'pcs','text',null,true)}${field('On hand','stock',p?.stock||0,'number',null,true)}${field('Reorder at','min',p?.min||0,'number',null,true)}${field('Warehouse / location','location',p?.location||locs[0],null,locs,true)}</div>`,editing?'Save product':'Create product',f=>{let rec={id:p?.id||`P-${Math.floor(1000+Math.random()*8999)}`,name:f.get('name').trim(),sku:f.get('sku').trim(),category:f.get('category'),unit:f.get('unit').trim(),stock:+f.get('stock'),min:+f.get('min'),location:f.get('location'),icon:p?.icon||'◫'};if(products.some(x=>x.sku.toLowerCase()===rec.sku.toLowerCase()&&x.id!==p?.id)){toast('That SKU is already in use.',true);return}if(editing)products=products.map(x=>x.id===p.id?rec:x);else products.unshift(rec);save();closeModal();page();toast(editing?'Product updated.':'Product added to your catalog.')})}
+function opModal(type='Receipt'){
+ const isTransfer=type==='Internal',isAdjust=type==='Adjustment',available=products.filter(p=>p.stock>0),productOptions=(isAdjust?products:available).map(p=>p.name),locs=['Main Warehouse','Production Floor','East Depot'];
+ let body=`<div class="form-grid">${field(isTransfer?'Transfer from':'Warehouse','warehouse',locs[0],null,locs,true)}${field(isTransfer?'Transfer to':isAdjust?'Adjustment reason':'Supplier / customer',isTransfer?'destination':isAdjust?'reason':'party',isTransfer?locs[1]:isAdjust?'Cycle count':'','text',isTransfer?locs:null,true)}${field('Product','product',productOptions[0]||'',null,productOptions,true)}${field(isAdjust?'Counted quantity':'Quantity','qty',1,'number',null,true)}${field('Date','date',localDate(),'date',null,true)}${type==='Receipt'||type==='Delivery'?field('Status','status','Ready',null,['Draft','Waiting','Ready'],true):''}${isAdjust?'<div class="field full"><label>Notes</label><textarea name="notes" placeholder="Add a note about this adjustment"></textarea></div>':''}</div>`;
+ openModal(`New ${type.toLowerCase()}`,isTransfer?'Move goods to another warehouse or location.':isAdjust?'Enter the physical count; the difference will be logged.':type==='Receipt'?'Record incoming stock from a supplier.':'Create an order for goods leaving your warehouse.',body,'Create operation',f=>{
+ const p=products.find(x=>x.name===f.get('product'));if(!p){toast('Add a product before creating this operation.',true);return}let qty=+f.get('qty'),status=f.get('status')||'Done';if(!qty||qty<0){toast('Enter a quantity greater than zero.',true);return}
+ if(type==='Delivery'&&qty>p.stock){toast(`Only ${p.stock} ${p.unit} of ${p.name} are available.`,true);return}if(type==='Internal'&&f.get('warehouse')===f.get('destination')){toast('Choose a different destination location.',true);return}
+ let delta=type==='Receipt'?qty:type==='Delivery'?-qty:type==='Adjustment'?qty-p.stock:0;
+ if(type==='Receipt'&&status==='Ready')status='Waiting';
+ if(type!=='Internal'&&type!=='Adjustment'&&status==='Done'){p.stock+=delta;}
+ if(type==='Adjustment'){delta=qty-p.stock;p.stock=qty;status='Done'}
+ if(type==='Internal'){let dest=f.get('destination'),source=f.get('warehouse');if(qty>p.stock){toast(`Only ${p.stock} ${p.unit} are available.`,true);return}p.stock-=qty;p.location=dest;status='Done';}
+ const ref=(type==='Receipt'?'REC':type==='Delivery'?'DEL':type==='Internal'?'TRF':'ADJ')+'-'+Math.floor(1000+Math.random()*8999);
+ operations.unshift({id:ref,type,party:type==='Internal'?`${f.get('warehouse')} → ${f.get('destination')}`:type==='Adjustment'?f.get('reason'):f.get('party').trim(),lines:p.name,qty:type==='Adjustment'?delta:type==='Delivery'?-qty:qty,warehouse:f.get('warehouse'),date:f.get('date'),status});save();closeModal();page();toast(`${type} ${ref} created.`)
+ })
 }
-
-
-// ===============================
-// UPDATE MOVEMENT TABLE
-// ===============================
-
-function updateMovementTable() {
-
-    const table =
-        document.getElementById("movementTable");
-
-    const filteredProducts =
-        getFilteredProducts();
-
-    table.innerHTML = "";
-
-    filteredProducts.forEach(product => {
-
-        let quantity = product.stock;
-        let movementType = "Receipt";
-
-        if (product.type === "delivery") {
-
-            movementType = "Delivery";
-            quantity = -10;
-
-        } else if (product.type === "transfer") {
-
-            movementType = "Transfer";
-            quantity = 20;
-
-        } else if (product.type === "adjustment") {
-
-            movementType = "Adjustment";
-            quantity = -3;
-        }
-
-        const row =
-            document.createElement("tr");
-
-        row.innerHTML = `
-            <td>${product.name}</td>
-
-            <td>${movementType}</td>
-
-            <td>
-                ${quantity > 0 ? "+" : ""}${quantity}
-            </td>
-
-            <td>
-                ${
-                    product.warehouse === "main"
-                    ? "Main Warehouse"
-                    : "Production Floor"
-                }
-            </td>
-
-            <td>
-                ${
-                    product.status.charAt(0).toUpperCase()
-                    + product.status.slice(1)
-                }
-            </td>
-        `;
-
-        table.appendChild(row);
-
-    });
-
-    if (filteredProducts.length === 0) {
-
-        table.innerHTML = `
-            <tr>
-                <td colspan="5" style="text-align:center;">
-                    No inventory records match the selected filters.
-                </td>
-            </tr>
-        `;
-    }
+function closeModal(){$('#modalRoot').innerHTML=''}
+function toast(message,error=false){const el=document.createElement('div');el.className='toast'+(error?' error':'');el.textContent=message;$('#toastRegion').append(el);setTimeout(()=>el.remove(),3200)}
+let liveSource=null,liveRetry=null,liveRetryDelay=1500;
+function connectionStatus(state){const el=$('#syncState');if(!el)return;el.classList.toggle('connected',state==='connected');el.classList.toggle('offline',state==='offline');el.innerHTML=`<i></i> ${state==='connected'?'Live':state==='offline'?'Reconnecting':'Connecting'}`}
+async function connectLiveUpdates(){connectionStatus('connecting');try{const {ticket}=await api('/api/events/ticket',{method:'POST'});if(liveSource)liveSource.close();const source=new EventSource(`/api/events?ticket=${encodeURIComponent(ticket)}`);liveSource=source;source.onopen=()=>{liveRetryDelay=1500;connectionStatus('connected')};source.addEventListener('inventory',event=>{try{const state=JSON.parse(event.data);const changed=JSON.stringify(products)!==JSON.stringify(state.products)||JSON.stringify(operations)!==JSON.stringify(state.operations);if(changed){products=state.products;operations=state.operations;page()}}catch{}});source.onerror=()=>{connectionStatus('offline');source.close();if(liveSource===source){liveSource=null;clearTimeout(liveRetry);liveRetry=setTimeout(connectLiveUpdates,liveRetryDelay);liveRetryDelay=Math.min(liveRetryDelay*2,10000)}}}catch{connectionStatus('offline');clearTimeout(liveRetry);liveRetry=setTimeout(connectLiveUpdates,liveRetryDelay);liveRetryDelay=Math.min(liveRetryDelay*2,10000)}}
+function toggleProfileMenu(){const old=$('#accountMenu');if(old){old.remove();$('#topAvatar').setAttribute('aria-expanded','false');return}const menu=document.createElement('div');menu.className='account-menu';menu.id='accountMenu';menu.setAttribute('role','menu');menu.innerHTML=`<div class="account-menu-head"><b>${esc(properName(currentUser.name))}</b><small>${esc(currentUser.email)}</small></div><button type="button" role="menuitem" data-action="profile-settings">My Profile</button><button type="button" role="menuitem" data-action="logout">Log out</button>`;$('.top-actions').append(menu);$('#topAvatar').setAttribute('aria-expanded','true')}
+function exportCsv(kind){let rows=kind==='products'?products.map(p=>[p.id,p.name,p.sku,p.category,p.stock,p.unit,p.min,p.location,stockState(p)]):operations.map(o=>[o.id,o.type,o.party,o.lines,o.qty,o.warehouse,o.date,o.status]);let headers=kind==='products'?['ID','Product','SKU','Category','On hand','Unit','Reorder at','Location','Status']:['Reference','Type','Contact or route','Products','Quantity','Location','Date','Status'];let csv=[headers,...rows].map(row=>row.map(v=>`"${String(v??'').replaceAll('"','""')}"`).join(',')).join('\r\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`stocksense-${kind}-${localDate()}.csv`;a.click();URL.revokeObjectURL(a.href);toast('CSV export downloaded.')}
+function handleAction(action,el){const id=el.dataset.id;
+ switch(action){case'help-center':helpHistory=[];openModal('AI Help Center','Ask questions about StockSense or your inventory.',`<div class="ai-chat-messages" id="aiChatMessages"><div class="ai-message assistant">Hi ${esc(properName(currentUser.name).split(/\s+/)[0])}! I can help you use StockSense and answer questions about your current stock. What would you like to know?</div></div><div class="ai-suggestions"><button type="button" data-action="ai-prompt" data-question="How do I record incoming stock?">Record incoming stock</button><button type="button" data-action="ai-prompt" data-question="Which products are below their reorder level?">Low stock products</button></div><div class="ai-composer"><textarea id="aiQuestion" rows="2" maxlength="1200" placeholder="Ask StockSense AI…"></textarea><button type="button" class="btn btn-primary" data-action="ask-ai" id="aiSend">Send</button></div><p class="ai-privacy-note">Your question and a limited snapshot of stock and recent operations are sent to the configured AI provider (Gemini or OpenAI). Don’t include passwords, OTPs, or other sensitive details.</p>`,'Close help',()=>closeModal());break;case'add-product' :productModal();break;case'edit-product':{let p=products.find(x=>x.id===id);if(p)productModal(p);break}case'new-operation':{const target=({receipts:'Receipt',deliveries:'Delivery',transfers:'Internal',adjustments:'Adjustment'})[view]||'Receipt';openOpChooser(target);break}case'export-products':exportCsv('products');break;case'export-history':exportCsv('operations');break;case'close-modal':closeModal();break;case'add-warehouse':toast('Warehouse setup will be available when connected to your workspace.');break;case'save-settings':toast('Your settings have been saved.');break;case'toggle':el.classList.toggle('on');break;case'reset-password':passwordModal();break;case'profile-settings':$('#accountMenu')?.remove();$('#topAvatar').setAttribute('aria-expanded','false');view='settings';page();break;case'logout':api('/api/auth/logout',{method:'POST'}).finally(()=>{sessionStorage.removeItem('stocksense-token');location.href='login.html'});break;case'edit-profile':editProfileModal();break;case'op-menu':{const op=operations.find(o=>o.id===id);if(!op)return;if(op.status!=='Done'&&op.status!=='Canceled'){openModal(`Validate ${op.id}`,'Confirm this stock operation. Validation updates on-hand quantities.',`<p style="font-size:12px;color:#65736b">${esc(op.type)} · ${esc(op.lines)} · ${op.qty} units at ${esc(op.warehouse)}.</p>${field('Status','status','Done',null,['Done','Canceled'],true)}`,'Update status',f=>{op.status=f.get('status');if(op.type==='Receipt'&&op.status==='Done'){let p=products.find(x=>x.name===op.lines);if(p)p.stock+=op.qty}if(op.type==='Delivery'&&op.status==='Done'){let p=products.find(x=>x.name===op.lines);if(p)p.stock=Math.max(0,p.stock-Math.abs(op.qty))}save();closeModal();page();toast('Operation status updated.')})}else toast(`${op.id} is ${op.status.toLowerCase()}.`);break}case'backdrop':if(el===event.target)closeModal();break;default:break}}
+function openOpChooser(defaultType){const opts=['Receipt','Delivery','Internal','Adjustment'];if(opts.length===1){opModal(defaultType);return}openModal('Choose operation','Select the kind of stock movement you want to record.',`<div class="form-grid">${field('Operation type','type',defaultType,null,opts,true)}</div>`,'Continue',f=>{let t=f.get('type');closeModal();opModal(t)})}
+function passwordModal(){openModal('Reset your password','We’ll send a one-time code to your account email.',`<div class="form-grid">${field('Email address','email',currentUser.email,'email',null,true)}</div>`,'Send OTP',async f=>{try{const d=await api('/api/auth/forgot',{method:'POST',body:JSON.stringify({email:f.get('email')})});closeModal();openOtpModal(f.get('email'));if(d.developmentOtp)toast(`${d.message} ${d.developmentOtp}`);else toast(d.message)}catch(e){toast(e.message,true)}})}
+function openOtpModal(email){openModal('Verify your email','Enter the 6-digit code and choose a new password.',`<div class="form-grid">${field('One-time code','otp','','text',null,true)}${field('New password','password','','password',null,true)}</div>`,'Update password',async f=>{try{await api('/api/auth/reset',{method:'POST',body:JSON.stringify({email,otp:f.get('otp'),password:f.get('password')})});closeModal();toast('Password updated. Sign in again with your new password.')}catch(e){toast(e.message,true)}})}
+function editProfileModal(){openModal('My profile','Add a mobile number to enable OTP sign-in, or update your display name.',`<div class="form-grid">${field('Full name','name',currentUser.name,'text',null,true)}${field('Email address','email',currentUser.email,'email',null,true)}${field('Mobile number','phone',currentUser.phone||'','tel',null,false)}<p class="phone-note" style="grid-column:1/-1">Use international format with country code (for example +14155550123). Email address cannot be changed here.</p></div>`,'Save profile',async f=>{try{const data=await api('/api/auth/profile',{method:'PUT',body:JSON.stringify({name:f.get('name'),phone:f.get('phone')})});currentUser=data.user;const initials=personInitials(currentUser.name);$('#profileName').textContent=properName(currentUser.name);$('#sidebarAvatar').textContent=initials;$('#topAvatar').textContent=initials;closeModal();page();toast('Profile updated.')}catch(e){toast(e.message,true)}})}
+function appendAIMessage(role,text){const box=$('#aiChatMessages');if(!box)return;const node=document.createElement('div');node.className=`ai-message ${role}`;node.textContent=text;box.append(node);box.scrollTop=box.scrollHeight}
+async function askAI(){const input=$('#aiQuestion');if(!input)return;const question=input.value.trim();if(!question)return;const button=$('#aiSend'),history=helpHistory.slice(-8);helpHistory.push({role:'user',content:question});appendAIMessage('user',question);input.value='';if(button){button.disabled=true;button.textContent='Thinking…'}try{const result=await api('/api/help/ask',{method:'POST',body:JSON.stringify({question,history})});helpHistory.push({role:'assistant',content:result.answer});appendAIMessage('assistant',result.answer)}catch(err){appendAIMessage('error',err.message)}finally{if(button){button.disabled=false;button.textContent='Send'}input.focus()}}
+document.addEventListener('keydown',e=>{if(e.target.id==='aiQuestion'&&e.key==='Enter'&&!e.shiftKey){e.preventDefault();askAI()}});
+document.addEventListener('click',e=>{const nav=e.target.closest('[data-view]');if(nav){if($('#modalRoot').innerHTML)closeModal();view=nav.dataset.view;query='';statusFilter='All statuses';categoryFilter='All categories';tableFilter='All';page();$('#sidebar').classList.remove('open');return}const filter=e.target.closest('[data-stockfilter]');if(filter){tableFilter=filter.dataset.stockfilter;page();return}const act=e.target.closest('[data-action]');if(act)handleAction(act.dataset.action,act)});
+document.addEventListener('input',e=>{if(e.target.id==='productSearch'||e.target.id==='operationSearch'){query=e.target.value;let pos=e.target.selectionStart;page();let n=$('#'+e.target.id);n?.focus();n?.setSelectionRange(pos,pos)}if(e.target.id==='productSearch')categoryFilter=$('#categoryFilter')?.value||categoryFilter});
+document.addEventListener('change',e=>{if(e.target.id==='categoryFilter'){categoryFilter=e.target.value;page()}if(e.target.id==='statusFilter'){statusFilter=e.target.value;page()}if(e.target.id==='dashType'||e.target.id==='dashStatus'){let t=$('#dashType')?.value,s=$('#dashStatus')?.value;let rows=operations.filter(o=>(t==='All types'||o.type===t)&&(s==='All statuses'||o.status===s));$('#recentBody').innerHTML=renderOpRows(rows.slice(0,6),true)}if(e.target.id==='warehouseFilter'&&e.target.value!=='All warehouses'){toast(`Showing workspace overview. Location filter: ${e.target.value}`)}});
+$('#mainNav').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b){view=b.dataset.view;page()}});
+$('#menuToggle').addEventListener('click',()=>$('#sidebar').classList.toggle('open'));
+$('#notificationButton').addEventListener('click',()=>{view='products';tableFilter='Low stock';page();toast(`${products.filter(p=>p.stock<=p.min).length} products need attention.`)});
+$('#topAvatar').addEventListener('click',toggleProfileMenu);
+$('#profileButton').addEventListener('click',toggleProfileMenu);
+document.addEventListener('click',e=>{if($('#accountMenu')&&!e.target.closest('#accountMenu')&&!e.target.closest('#topAvatar')&&!e.target.closest('#profileButton')){$('#accountMenu').remove();$('#topAvatar').setAttribute('aria-expanded','false')}});
+async function boot(){
+ try{const session=await api('/api/auth/me');currentUser=session.user;const initials=personInitials(currentUser.name),fullName=properName(currentUser.name);$('#profileName').textContent=fullName;$('#sidebarAvatar').textContent=initials;$('#topAvatar').textContent=initials;$('#workspaceName').textContent=currentUser.workspace;$('#workspaceInitial').textContent=personInitials(currentUser.workspace).slice(0,1);const state=await api('/api/state');products=state.products;operations=state.operations;page();connectLiveUpdates()}
+ catch(e){toast(`Could not load inventory: ${e.message}`,true)}
 }
-
-
-// ===============================
-// UPDATE LOW STOCK ALERTS
-// ===============================
-
-function updateLowStockAlerts() {
-
-    const lowStockList =
-        document.getElementById("lowStockList");
-
-    const lowStockProducts =
-        products.filter(product => product.stock < 50);
-
-    lowStockList.innerHTML = "";
-
-    if (lowStockProducts.length === 0) {
-
-        lowStockList.innerHTML = `
-            <div class="alert-item">
-                <span>No low stock items</span>
-                <strong>✓</strong>
-            </div>
-        `;
-
-        return;
-    }
-
-    lowStockProducts.forEach(product => {
-
-        const item =
-            document.createElement("div");
-
-        item.className = "alert-item";
-
-        item.innerHTML = `
-            <span>${product.name}</span>
-            <strong>${product.stock} units</strong>
-        `;
-
-        lowStockList.appendChild(item);
-
-    });
-}
-
-
-// ===============================
-// APPLY FILTERS
-// ===============================
-
-function applyFilters() {
-
-    updateStockGraph();
-
-    updateMovementTable();
-
-}
-
-
-// ===============================
-// FILTER EVENT LISTENERS
-// ===============================
-
-document
-    .getElementById("documentFilter")
-    .addEventListener("change", applyFilters);
-
-document
-    .getElementById("statusFilter")
-    .addEventListener("change", applyFilters);
-
-document
-    .getElementById("warehouseFilter")
-    .addEventListener("change", applyFilters);
-
-document
-    .getElementById("categoryFilter")
-    .addEventListener("change", applyFilters);
-
-
-// ===============================
-// HISTORY MODAL
-// ===============================
-
-const historyModal =
-    document.getElementById("historyModal");
-
-const viewHistoryBtn =
-    document.getElementById("viewHistoryBtn");
-
-const closeHistoryBtn =
-    document.getElementById("closeHistoryBtn");
-
-
-viewHistoryBtn.addEventListener("click", function () {
-
-    historyModal.style.display = "flex";
-
-});
-
-
-closeHistoryBtn.addEventListener("click", function () {
-
-    historyModal.style.display = "none";
-
-});
-
-
-historyModal.addEventListener("click", function (event) {
-
-    if (event.target === historyModal) {
-
-        historyModal.style.display = "none";
-
-    }
-
-});
-
-
-// ===============================
-// SEARCH INVENTORY
-// ===============================
-
-const inventorySearch =
-    document.getElementById("inventorySearch");
-
-inventorySearch.addEventListener("input", function () {
-
-    const searchText =
-        this.value.toLowerCase();
-
-    const rows =
-        document.querySelectorAll("#movementTable tr");
-
-    rows.forEach(row => {
-
-        const text =
-            row.textContent.toLowerCase();
-
-        row.style.display =
-            text.includes(searchText)
-            ? ""
-            : "none";
-
-    });
-
-});
-
-
-// ===============================
-// INITIALIZE DASHBOARD
-// ===============================
-
-updateKPIs();
-
-applyFilters();
-
-updateLowStockAlerts();
-
-console.log(
-    "StockSense Dashboard loaded successfully."
-);
+boot();
