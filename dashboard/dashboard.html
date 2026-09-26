@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>StockSense | Inventory Dashboard</title>
 
     <link rel="stylesheet" href="dashboard.css">
@@ -10,11 +11,12 @@
 
 <body>
 
-    <!-- Sidebar -->
+    <!-- SIDEBAR -->
     <aside class="sidebar">
+
         <div class="logo">
             <h2>StockSense</h2>
-            <span>Inventory Management</span>
+            <p>Inventory Management</p>
         </div>
 
         <nav>
@@ -32,27 +34,31 @@
             <a href="#">My Profile</a>
             <a href="#">Logout</a>
         </div>
+
     </aside>
 
 
-    <!-- Main Content -->
+    <!-- MAIN CONTENT -->
     <main class="main-content">
 
-        <!-- Header -->
+        <!-- TOP HEADER -->
         <header class="topbar">
+
             <div>
                 <h1>Inventory Dashboard</h1>
-                <p>Overview of your inventory operations</p>
+                <p>Monitor your stock and inventory operations</p>
             </div>
 
             <div class="user-info">
                 <span>Inventory Manager</span>
             </div>
+
         </header>
 
 
-        <!-- Filters -->
+        <!-- FILTERS -->
         <section class="filters">
+
             <select id="documentFilter">
                 <option value="all">All Documents</option>
                 <option value="receipt">Receipts</option>
@@ -81,83 +87,117 @@
                 <option value="raw">Raw Materials</option>
                 <option value="finished">Finished Goods</option>
             </select>
+
         </section>
 
 
-        <!-- KPI Cards -->
+        <!-- KPI CARDS -->
         <section class="kpi-grid">
 
             <div class="kpi-card">
                 <span>Total Products</span>
-                <h2 id="totalProducts">0</h2>
+                <h2 id="totalProducts">248</h2>
             </div>
 
             <div class="kpi-card">
                 <span>Low Stock</span>
-                <h2 id="lowStock">0</h2>
+                <h2 id="lowStock">12</h2>
             </div>
 
             <div class="kpi-card">
                 <span>Out of Stock</span>
-                <h2 id="outOfStock">0</h2>
+                <h2 id="outOfStock">4</h2>
             </div>
 
             <div class="kpi-card">
                 <span>Pending Receipts</span>
-                <h2 id="pendingReceipts">0</h2>
+                <h2 id="pendingReceipts">8</h2>
             </div>
 
             <div class="kpi-card">
                 <span>Pending Deliveries</span>
-                <h2 id="pendingDeliveries">0</h2>
+                <h2 id="pendingDeliveries">15</h2>
             </div>
 
             <div class="kpi-card">
                 <span>Scheduled Transfers</span>
-                <h2 id="scheduledTransfers">0</h2>
+                <h2 id="scheduledTransfers">6</h2>
             </div>
 
         </section>
 
 
-        <!-- Inventory Overview -->
+        <!-- DASHBOARD PANELS -->
         <section class="dashboard-grid">
 
+            <!-- STOCK OVERVIEW -->
             <div class="panel">
+
                 <div class="panel-header">
                     <h2>Stock Overview</h2>
+                    <span>Current Inventory</span>
                 </div>
 
-                <div class="chart-placeholder" id="stockChart">
-                    Stock overview chart
+                <div id="stockChart" class="chart-placeholder">
+                    Stock Overview
                 </div>
+
             </div>
 
 
+            <!-- LOW STOCK -->
             <div class="panel">
+
                 <div class="panel-header">
                     <h2>Low Stock Alerts</h2>
+                    <span>Needs Attention</span>
                 </div>
 
                 <div id="lowStockList">
-                    <!-- Data will be inserted by JavaScript -->
+
+                    <div class="alert-item">
+                        <span>Steel Rods</span>
+                        <strong>8 units</strong>
+                    </div>
+
+                    <div class="alert-item">
+                        <span>Aluminium Sheets</span>
+                        <strong>5 units</strong>
+                    </div>
+
+                    <div class="alert-item">
+                        <span>Plastic Covers</span>
+                        <strong>3 units</strong>
+                    </div>
+
                 </div>
+
             </div>
 
         </section>
 
 
-        <!-- Recent Inventory Movements -->
+        <!-- RECENT MOVEMENTS -->
         <section class="panel movement-panel">
 
             <div class="panel-header">
-                <h2>Recent Inventory Movements</h2>
-                <button id="viewHistoryBtn">View History</button>
+
+                <div>
+                    <h2>Recent Inventory Movements</h2>
+                    <span>Latest stock activity</span>
+                </div>
+
+                <button id="viewHistoryBtn">
+                    View History
+                </button>
+
             </div>
+
 
             <div class="table-container">
 
                 <table>
+
                     <thead>
                         <tr>
                             <th>Product</th>
@@ -169,8 +209,41 @@
                     </thead>
 
                     <tbody id="movementTable">
-                        <!-- Data will be inserted by JavaScript -->
+
+                        <tr>
+                            <td>Steel Rods</td>
+                            <td>Receipt</td>
+                            <td>+50</td>
+                            <td>Main Warehouse</td>
+                            <td>Done</td>
+                        </tr>
+
+                        <tr>
+                            <td>Office Chairs</td>
+                            <td>Delivery</td>
+                            <td>-10</td>
+                            <td>Main Warehouse</td>
+                            <td>Done</td>
+                        </tr>
+
+                        <tr>
+                            <td>Aluminium Sheets</td>
+                            <td>Transfer</td>
+                            <td>20</td>
+                            <td>Production Floor</td>
+                            <td>Ready</td>
+                        </tr>
+
+                        <tr>
+                            <td>Plastic Covers</td>
+                            <td>Adjustment</td>
+                            <td>-3</td>
+                            <td>Main Warehouse</td>
+                            <td>Done</td>
+                        </tr>
+
                     </tbody>
+
                 </table>
 
             </div>
@@ -178,6 +251,7 @@
         </section>
 
     </main>
+
 
     <script src="dashboard.js"></script>
 
