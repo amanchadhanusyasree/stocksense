@@ -143,3 +143,8 @@ document
 updateKPIs();
 
 console.log("StockSense Dashboard loaded successfully.");
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="dashboard.js"></script>
+
+</body>
+</html>
