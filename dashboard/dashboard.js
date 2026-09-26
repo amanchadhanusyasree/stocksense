@@ -95,3 +95,30 @@ document
 updateKPIs();
 
 console.log("StockSense Dashboard loaded successfully.");
+
+const ctx = document.getElementById("stockChart");
+
+new Chart(ctx, {
+    type: "bar",
+
+    data: {
+        labels: [
+            "Steel Rods",
+            "Aluminium Sheets",
+            "Plastic Covers",
+            "Office Chairs",
+            "Copper Wires"
+        ],
+
+        datasets: [{
+            label: "Available Stock",
+
+            data: [120, 85, 45, 70, 95]
+        }]
+    },
+
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
