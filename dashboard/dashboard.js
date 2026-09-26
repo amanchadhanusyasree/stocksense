@@ -336,5 +336,31 @@ document
 updateKPIs();
 
 applyFilters();
+const documentFilter = document.getElementById("documentFilter");
 
+documentFilter.addEventListener("change", function () {
+
+    const selected = this.value;
+
+    if (selected === "receipt") {
+        document.querySelector(".bar:nth-child(1)").style.height = "150px";
+    }
+
+    else if (selected === "delivery") {
+        document.querySelector(".bar:nth-child(1)").style.height = "80px";
+    }
+
+    else if (selected === "transfer") {
+        document.querySelector(".bar:nth-child(1)").style.height = "110px";
+    }
+
+    else if (selected === "adjustment") {
+        document.querySelector(".bar:nth-child(1)").style.height = "60px";
+    }
+
+    else {
+        document.querySelector(".bar:nth-child(1)").style.height = "120px";
+    }
+
+});
 console.log("StockSense Dashboard loaded successfully.");
