@@ -45,35 +45,34 @@ function updateKPIs() {
 // FILTERS
 // ===============================
 
-const filters = document.querySelectorAll(".filters select");
+const documentFilter = document.querySelector("select");
 
-filters.forEach(filter => {
+documentFilter.addEventListener("change", function () {
 
-    filter.addEventListener("change", () => {
+    const selected = this.value;
 
-        const documentType =
-            document.getElementById("documentFilter").value;
+    if (selected === "Receipts") {
+        stockChart.data.datasets[0].data = [150, 110, 60, 90, 120];
+    }
 
-        const status =
-            document.getElementById("statusFilter").value;
+    else if (selected === "Deliveries") {
+        stockChart.data.datasets[0].data = [80, 55, 30, 45, 70];
+    }
 
-        const warehouse =
-            document.getElementById("warehouseFilter").value;
+    else if (selected === "Internal Transfers") {
+        stockChart.data.datasets[0].data = [100, 75, 40, 60, 85];
+    }
 
-        const category =
-            document.getElementById("categoryFilter").value;
+    else if (selected === "Adjustments") {
+        stockChart.data.datasets[0].data = [90, 65, 35, 50, 75];
+    }
 
-        console.log("Filters selected:", {
-            documentType,
-            status,
-            warehouse,
-            category
-        });
+    else {
+        stockChart.data.datasets[0].data = [120, 85, 45, 70, 95];
+    }
 
-    });
-
+    stockChart.update();
 });
-
 
 // ===============================
 // VIEW HISTORY BUTTON
