@@ -342,24 +342,46 @@ documentFilter.addEventListener("change", function () {
 
     const selected = this.value;
 
+    const bars = document.querySelectorAll(".bar");
+
     if (selected === "receipt") {
-        document.querySelector(".bar:nth-child(1)").style.height = "150px";
+        bars[0].style.height = "150px";
+        bars[1].style.height = "110px";
+        bars[2].style.height = "50px";
+        bars[3].style.height = "70px";
+        bars[4].style.height = "100px";
     }
 
     else if (selected === "delivery") {
-        document.querySelector(".bar:nth-child(1)").style.height = "80px";
+        bars[0].style.height = "80px";
+        bars[1].style.height = "60px";
+        bars[2].style.height = "40px";
+        bars[3].style.height = "120px";
+        bars[4].style.height = "70px";
     }
 
     else if (selected === "transfer") {
-        document.querySelector(".bar:nth-child(1)").style.height = "110px";
+        bars[0].style.height = "110px";
+        bars[1].style.height = "80px";
+        bars[2].style.height = "55px";
+        bars[3].style.height = "65px";
+        bars[4].style.height = "130px";
     }
 
     else if (selected === "adjustment") {
-        document.querySelector(".bar:nth-child(1)").style.height = "60px";
+        bars[0].style.height = "60px";
+        bars[1].style.height = "50px";
+        bars[2].style.height = "100px";
+        bars[3].style.height = "45px";
+        bars[4].style.height = "75px";
     }
 
     else {
-        document.querySelector(".bar:nth-child(1)").style.height = "120px";
+        bars[0].style.height = "120px";
+        bars[1].style.height = "85px";
+        bars[2].style.height = "45px";
+        bars[3].style.height = "70px";
+        bars[4].style.height = "95px";
     }
 
 });
