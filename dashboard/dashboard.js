@@ -1,12 +1,30 @@
-historyModal.addEventListener("click", function (event) {
+function updateLowStockAlerts() {
 
-    if (event.target === historyModal) {
+    const lowStockList =
+        document.getElementById("lowStockList");
 
-        historyModal.style.display = "none";
+    const lowStockProducts =
+        products.filter(product => product.stock < 50);
 
-    }
+    lowStockList.innerHTML = "";
 
-});
+    lowStockProducts.forEach(product => {
+
+        const item = document.createElement("div");
+
+        item.className = "alert-item";
+
+        item.innerHTML = `
+            <span>${product.name}</span>
+            <strong>${product.stock} units</strong>
+        `;
+
+        lowStockList.appendChild(item);
+
+    });
+}
+
+updateLowStockAlerts();
 
 
 // ===============================
