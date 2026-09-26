@@ -1,1 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockSense | Inventory Dashboard</title>
 
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <h2>StockSense</h2>
+            <span>Inventory Management</span>
+        </div>
+
+        <nav>
+            <a href="#" class="active">Dashboard</a>
+            <a href="#">Products</a>
+            <a href="#">Receipts</a>
+            <a href="#">Deliveries</a>
+            <a href="#">Transfers</a>
+            <a href="#">Adjustments</a>
+            <a href="#">Move History</a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <a href="#">Settings</a>
+            <a href="#">My Profile</a>
+            <a href="#">Logout</a>
+        </div>
+    </aside>
+
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Header -->
+        <header class="topbar">
+            <div>
+                <h1>Inventory Dashboard</h1>
+                <p>Overview of your inventory operations</p>
+            </div>
+
+            <div class="user-info">
+                <span>Inventory Manager</span>
+            </div>
+        </header>
+
+
+        <!-- Filters -->
+        <section class="filters">
+            <select id="documentFilter">
+                <option value="all">All Documents</option>
+                <option value="receipt">Receipts</option>
+                <option value="delivery">Deliveries</option>
+                <option value="transfer">Internal Transfers</option>
+                <option value="adjustment">Adjustments</option>
+            </select>
+
+            <select id="statusFilter">
+                <option value="all">All Status</option>
+                <option value="draft">Draft</option>
+                <option value="waiting">Waiting</option>
+                <option value="ready">Ready</option>
+                <option value="done">Done</option>
+                <option value="cancelled">Cancelled</option>
+            </select>
+
+            <select id="warehouseFilter">
+                <option value="all">All Warehouses</option>
+                <option value="main">Main Warehouse</option>
+                <option value="production">Production Floor</option>
+            </select>
+
+            <select id="categoryFilter">
+                <option value="all">All Categories</option>
+                <option value="raw">Raw Materials</option>
+                <option value="finished">Finished Goods</option>
+            </select>
+        </section>
+
+
+        <!-- KPI Cards -->
+        <section class="kpi-grid">
+
+            <div class="kpi-card">
+                <span>Total Products</span>
+                <h2 id="totalProducts">0</h2>
+            </div>
+
+            <div class="kpi-card">
+                <span>Low Stock</span>
+                <h2 id="lowStock">0</h2>
+            </div>
+
+            <div class="kpi-card">
+                <span>Out of Stock</span>
+                <h2 id="outOfStock">0</h2>
+            </div>
+
+            <div class="kpi-card">
+                <span>Pending Receipts</span>
+                <h2 id="pendingReceipts">0</h2>
+            </div>
+
+            <div class="kpi-card">
+                <span>Pending Deliveries</span>
+                <h2 id="pendingDeliveries">0</h2>
+            </div>
+
+            <div class="kpi-card">
+                <span>Scheduled Transfers</span>
+                <h2 id="scheduledTransfers">0</h2>
+            </div>
+
+        </section>
+
+
+        <!-- Inventory Overview -->
+        <section class="dashboard-grid">
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Stock Overview</h2>
+                </div>
+
+                <div class="chart-placeholder" id="stockChart">
+                    Stock overview chart
+                </div>
+            </div>
+
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Low Stock Alerts</h2>
+                </div>
+
+                <div id="lowStockList">
+                    <!-- Data will be inserted by JavaScript -->
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- Recent Inventory Movements -->
+        <section class="panel movement-panel">
+
+            <div class="panel-header">
+                <h2>Recent Inventory Movements</h2>
+                <button id="viewHistoryBtn">View History</button>
+            </div>
+
+            <div class="table-container">
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Type</th>
+                            <th>Quantity</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="movementTable">
+                        <!-- Data will be inserted by JavaScript -->
+                    </tbody>
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <script src="dashboard.js"></script>
+
+</body>
+</html>
