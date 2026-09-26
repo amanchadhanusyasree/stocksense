@@ -158,7 +158,7 @@ function updateStockGraph() {
         document.querySelectorAll(".bar-chart .bar-item span");
 
 
-    // Hide all bars first
+    // Reset all bars
 
     bars.forEach((bar, index) => {
 
@@ -168,7 +168,7 @@ function updateStockGraph() {
     });
 
 
-    // Display filtered products
+    // Show filtered products
 
     filteredProducts.forEach(product => {
 
@@ -213,17 +213,18 @@ function updateMovementTable() {
 
         let movementType = "Receipt";
 
+
         if (product.type === "delivery") {
             movementType = "Delivery";
             quantity = -10;
         }
 
-        if (product.type === "transfer") {
+        else if (product.type === "transfer") {
             movementType = "Transfer";
             quantity = 20;
         }
 
-        if (product.type === "adjustment") {
+        else if (product.type === "adjustment") {
             movementType = "Adjustment";
             quantity = -3;
         }
@@ -235,8 +236,13 @@ function updateMovementTable() {
 
         row.innerHTML = `
             <td>${product.name}</td>
+
             <td>${movementType}</td>
-            <td>${quantity > 0 ? "+" : ""}${quantity}</td>
+
+            <td>
+                ${quantity > 0 ? "+" : ""}${quantity}
+            </td>
+
             <td>
                 ${
                     product.warehouse === "main"
@@ -244,6 +250,7 @@ function updateMovementTable() {
                     : "Production Floor"
                 }
             </td>
+
             <td>
                 ${
                     product.status.charAt(0).toUpperCase()
@@ -258,7 +265,7 @@ function updateMovementTable() {
     });
 
 
-    // Show message if nothing matches
+    // No matching records
 
     if (filteredProducts.length === 0) {
 
@@ -274,7 +281,7 @@ function updateMovementTable() {
 
 
 // ===============================
-// APPLY ALL FILTERS
+// APPLY FILTERS
 // ===============================
 
 function applyFilters() {
@@ -336,53 +343,5 @@ document
 updateKPIs();
 
 applyFilters();
-const documentFilter = document.getElementById("documentFilter");
 
-documentFilter.addEventListener("change", function () {
-
-    const selected = this.value;
-
-    const bars = document.querySelectorAll(".bar");
-
-    if (selected === "receipt") {
-        bars[0].style.height = "150px";
-        bars[1].style.height = "110px";
-        bars[2].style.height = "50px";
-        bars[3].style.height = "70px";
-        bars[4].style.height = "100px";
-    }
-
-    else if (selected === "delivery") {
-        bars[0].style.height = "80px";
-        bars[1].style.height = "60px";
-        bars[2].style.height = "40px";
-        bars[3].style.height = "120px";
-        bars[4].style.height = "70px";
-    }
-
-    else if (selected === "transfer") {
-        bars[0].style.height = "110px";
-        bars[1].style.height = "80px";
-        bars[2].style.height = "55px";
-        bars[3].style.height = "65px";
-        bars[4].style.height = "130px";
-    }
-
-    else if (selected === "adjustment") {
-        bars[0].style.height = "60px";
-        bars[1].style.height = "50px";
-        bars[2].style.height = "100px";
-        bars[3].style.height = "45px";
-        bars[4].style.height = "75px";
-    }
-
-    else {
-        bars[0].style.height = "120px";
-        bars[1].style.height = "85px";
-        bars[2].style.height = "45px";
-        bars[3].style.height = "70px";
-        bars[4].style.height = "95px";
-    }
-
-});
 console.log("StockSense Dashboard loaded successfully.");
