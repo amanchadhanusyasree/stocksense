@@ -120,10 +120,18 @@ new Chart(ctx, {
     options: {
         responsive: true,
         maintainAspectRatio: false
-        const documentFilter = document.querySelector("select");
+       const documentFilter = document.querySelector("select");
 
 documentFilter.addEventListener("change", function () {
-    console.log("Document filter selected:", this.value);
+
+    if (this.value === "All Documents") {
+        console.log("Showing all documents");
+    } 
+    else {
+        console.log("Selected:", this.value);
+    }
+
+});
 });
     }
 });
