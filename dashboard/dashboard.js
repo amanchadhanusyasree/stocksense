@@ -331,3 +331,40 @@ updateKPIs();
 applyFilters();
 
 console.log("StockSense Dashboard loaded successfully.");
+// ===============================
+// HISTORY MODAL
+// ===============================
+
+const historyModal =
+    document.getElementById("historyModal");
+
+const viewHistoryBtn =
+    document.getElementById("viewHistoryBtn");
+
+const closeHistoryBtn =
+    document.getElementById("closeHistoryBtn");
+
+
+viewHistoryBtn.addEventListener("click", function () {
+
+    historyModal.style.display = "flex";
+
+});
+
+
+closeHistoryBtn.addEventListener("click", function () {
+
+    historyModal.style.display = "none";
+
+});
+
+
+historyModal.addEventListener("click", function (event) {
+
+    if (event.target === historyModal) {
+
+        historyModal.style.display = "none";
+
+    }
+
+});
